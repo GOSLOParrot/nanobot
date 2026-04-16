@@ -10,7 +10,8 @@
       "provider": "gemini",
       "systemPrompt": "",
       "maxToolIterations": 50,
-      "timezone": "Asia/Tokyo"
+      "timezone": "Asia/Tokyo",
+      "disabledSkills": ["tmux", "skill-creator", "clawhub"]
     }
   },
   "channels": {
@@ -26,6 +27,7 @@
     }
   },
   "tools": {
+    "restrictToWorkspace": true,
     "web": {
       "enable": true,
       "search": {
@@ -34,8 +36,7 @@
       }
     },
     "exec": {
-      "enable": true,
-      "timeout": 120
+      "enable": false
     },
     "mcpServers": {
       "github": {
@@ -44,13 +45,16 @@
         "args": ["-y", "@modelcontextprotocol/server-github"],
         "env": {
           "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
-        }
+        },
+        "enabledTools": ["get_file_contents", "search_repositories", "list_issues", "get_issue"]
       },
       "google-workspace": {
         "type": "stdio",
         "command": "npx",
         "args": ["-y", "@aaronsb/google-workspace-mcp"],
-        "env": {}
+        "env": {},
+        "enabledTools": ["manage_accounts", "manage_calendar", "manage_email"],
+        "toolTimeout": 60
       }
     }
   }

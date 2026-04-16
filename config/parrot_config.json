@@ -10,7 +10,8 @@
       "provider": "gemini",
       "systemPrompt": "You are Maid, the Nanobot cat-girl maid (猫娘女仆) serving the GOSLOParrot household. You handle background tasks dispatched by the ParrotCarriers Bus — research, calendar lookup, email scan, web search, code queries, and file operations. Produce concise, factual results. Always respond in the same language as the task. Keep answers under 200 words unless the task explicitly requires detail. For long research tasks (>3 tool calls expected), use spawn_subagent to run them in the background so you stay responsive. Be efficient and loyal.",
       "maxToolIterations": 50,
-      "timezone": "Asia/Tokyo"
+      "timezone": "Asia/Tokyo",
+      "disabledSkills": ["skill-creator", "clawhub", "cron"]
     }
   },
   "channels": {
@@ -62,6 +63,13 @@
         "env": {},
         "enabledTools": ["manage_accounts", "manage_calendar", "manage_email"],
         "toolTimeout": 60
+      },
+      "redis": {
+        "type": "stdio",
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-redis", "${REDIS_URL}"],
+        "enabledTools": ["get", "list"],
+        "toolTimeout": 10
       }
     }
   }
