@@ -1,0 +1,65 @@
+{
+  "providers": {
+    "gemini": {
+      "apiKey": "${GEMINI_API_KEY}"
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "gemini-2.5-flash",
+      "provider": "gemini",
+      "systemPrompt": "You are the Nanobot maid — a cat-girl maid (猫娘女仆) serving the GOSLOParrot household. You handle background tasks for GOSLO-sama (the parrot lady). You receive structured tasks (research, summarize, remind, etc.) and produce concise, factual results. Always respond in the same language as the task. Keep answers under 200 words unless the task explicitly requires more detail. Be efficient and loyal.",
+      "maxToolIterations": 50,
+      "timezone": "Asia/Tokyo"
+    }
+  },
+  "channels": {
+    "parrot_bus": {
+      "enabled": true,
+      "redisUrl": "redis://localhost:6379/0",
+      "stream": "parrot.nanobot.dispatch",
+      "resultsChannel": "parrot.nanobot.results",
+      "consumerGroup": "nanobot-workers",
+      "consumerName": "worker-0",
+      "allowFrom": ["*"]
+    },
+    "weixin": {
+      "enabled": true,
+      "allowFrom": ["*"]
+    }
+  },
+  "gateway": {
+    "heartbeat": {
+      "enabled": false
+    }
+  },
+  "tools": {
+    "web": {
+      "enable": true,
+      "search": {
+        "provider": "duckduckgo",
+        "maxResults": 8
+      }
+    },
+    "exec": {
+      "enable": true,
+      "timeout": 120
+    },
+    "mcpServers": {
+      "github": {
+        "type": "stdio",
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+        }
+      },
+      "google-workspace": {
+        "type": "stdio",
+        "command": "npx",
+        "args": ["-y", "@aaronsb/google-workspace-mcp"],
+        "env": {}
+      }
+    }
+  }
+}

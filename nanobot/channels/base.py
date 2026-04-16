@@ -36,6 +36,7 @@ class BaseChannel(ABC):
         self.config = config
         self.bus = bus
         self._running = False
+        self.pre_handle_hook: Any | None = None
 
     async def transcribe_audio(self, file_path: str | Path) -> str:
         """Transcribe an audio file via Whisper (OpenAI or Groq). Returns empty string on failure."""
@@ -153,6 +154,14 @@ class BaseChannel(ABC):
                 sender_id, self.name,
             )
             return
+
+        if self.pre_handle_hook is not None:
+            result = await self.pre_handle_hook(
+                channel=self, sender_id=sender_id, chat_id=chat_id,
+                content=content, media=media, metadata=metadata,
+            )
+            if result is False:
+                return
 
         meta = metadata or {}
         if self.supports_streaming:

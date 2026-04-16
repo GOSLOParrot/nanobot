@@ -1,0 +1,57 @@
+{
+  "providers": {
+    "gemini": {
+      "apiKey": "${GEMINI_API_KEY}"
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "gemini-2.5-flash",
+      "provider": "gemini",
+      "systemPrompt": "",
+      "maxToolIterations": 50,
+      "timezone": "Asia/Tokyo"
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "token": "${TELEGRAM_BOT_TOKEN}",
+      "allowFrom": ["*"]
+    }
+  },
+  "gateway": {
+    "heartbeat": {
+      "enabled": false
+    }
+  },
+  "tools": {
+    "web": {
+      "enable": true,
+      "search": {
+        "provider": "duckduckgo",
+        "maxResults": 8
+      }
+    },
+    "exec": {
+      "enable": true,
+      "timeout": 120
+    },
+    "mcpServers": {
+      "github": {
+        "type": "stdio",
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+        }
+      },
+      "google-workspace": {
+        "type": "stdio",
+        "command": "npx",
+        "args": ["-y", "@aaronsb/google-workspace-mcp"],
+        "env": {}
+      }
+    }
+  }
+}
