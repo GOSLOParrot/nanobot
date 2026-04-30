@@ -17,7 +17,7 @@
   "channels": {
     "parrot_bus": {
       "enabled": true,
-      "redisUrl": "redis://localhost:6379/0",
+      "redisUrl": "redis://infra-redis-1:6379/0",
       "stream": "parrot.nanobot.dispatch",
       "resultsChannel": "parrot.nanobot.results",
       "consumerGroup": "nanobot-workers",
@@ -54,20 +54,24 @@
         "args": ["-y", "@modelcontextprotocol/server-github"],
         "env": {
           "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
-        }
+        },
+        "enabledTools": ["get_file_contents", "search_repositories", "list_issues", "get_issue"]
       },
-      "google-workspace": {
+      "google_workspace": {
         "type": "stdio",
         "command": "npx",
         "args": ["-y", "@aaronsb/google-workspace-mcp"],
-        "env": {},
+        "env": {
+          "GOOGLE_CLIENT_ID": "${GOOGLE_CLIENT_ID}",
+          "GOOGLE_CLIENT_SECRET": "${GOOGLE_CLIENT_SECRET}"
+        },
         "enabledTools": ["manage_accounts", "manage_calendar", "manage_email"],
         "toolTimeout": 60
       },
       "redis": {
         "type": "stdio",
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-redis", "${REDIS_URL}"],
+        "args": ["-y", "@modelcontextprotocol/server-redis", "redis://infra-redis-1:6379/0"],
         "enabledTools": ["get", "list"],
         "toolTimeout": 10
       }

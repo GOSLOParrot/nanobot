@@ -2,8 +2,14 @@ x-common-config: &common-config
   build:
     context: .
     dockerfile: Dockerfile
+  env_file:
+    - .env
   volumes:
     - ~/.nanobot:/home/nanobot/.nanobot
+    - ~/.nanobot/google-workspace-credentials:/home/nanobot/.local/share/google-workspace-mcp/credentials
+  networks:
+    - nanobot_internal
+    - infra_default
   cap_drop:
     - ALL
   cap_add:
@@ -53,3 +59,8 @@ services:
     command: ["status"]
     stdin_open: true
     tty: true
+
+networks:
+  nanobot_internal:
+  infra_default:
+    external: true

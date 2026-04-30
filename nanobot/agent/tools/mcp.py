@@ -143,7 +143,12 @@ class MCPResourceWrapper(Tool):
     ):
         self._session = session
         self._uri = resource_def.uri
-        self._name = f"mcp_{server_name}_resource_{resource_def.name}"
+        # Sanitize resource name: Gemini API rejects function names with spaces
+        # or special chars (e.g. "Active Safety Policies" → invalid 400). Replace
+        # any char outside [a-zA-Z0-9_] with underscore.
+        import re as _re
+        _safe_name = _re.sub(r"[^a-zA-Z0-9_]", "_", resource_def.name)
+        self._name = f"mcp_{server_name}_resource_{_safe_name}"
         desc = resource_def.description or resource_def.name
         self._description = f"[MCP Resource] {desc}\nURI: {self._uri}"
         self._parameters: dict[str, Any] = {
