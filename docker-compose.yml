@@ -7,6 +7,7 @@ x-common-config: &common-config
   volumes:
     - ~/.nanobot:/home/nanobot/.nanobot
     - ~/.nanobot/google-workspace-credentials:/home/nanobot/.local/share/google-workspace-mcp/credentials
+    - ~/.nanobot/gws-config:/home/nanobot/.config/google-workspace-mcp
   networks:
     - nanobot_internal
     - infra_default

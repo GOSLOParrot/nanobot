@@ -60,7 +60,7 @@
       "google_workspace": {
         "type": "stdio",
         "command": "npx",
-        "args": ["-y", "@aaronsb/google-workspace-mcp"],
+        "args": ["-y", "@aaronsb/google-workspace-mcp@2.2.0"],
         "env": {
           "GOOGLE_CLIENT_ID": "${GOOGLE_CLIENT_ID}",
           "GOOGLE_CLIENT_SECRET": "${GOOGLE_CLIENT_SECRET}"
