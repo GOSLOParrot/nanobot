@@ -1,6 +1,6 @@
 ---
 name: google-workspace
-description: "Use when you need to access Gmail, Google Calendar, or Google Drive via MCP. Triggered by task 'message_check', 'calendar_fetch', or explicit user requests for Google."
+description: "Use when you need to access Gmail, Google Calendar, or Google Drive via MCP. Triggered by task 'message_check', 'calendar_fetch', 'calendar_create', 'calendar_patch', 'calendar_delete', or explicit user requests for Google."
 ---
 
 # Google Workspace Skill
@@ -22,7 +22,12 @@ When tasked with `message_check` or reading Gmail:
 When tasked with `calendar_fetch` or reading Google Calendar:
 - Use the `manage_calendar` tool.
 - To list today's events, use `{"operation": "list_events", "timeMin": "<start_of_day_iso>", "timeMax": "<end_of_day_iso>"}`.
-- Extract event ID, title, start_time, end_time, location, and description.
+- Extract event ID, title, start_time, end_time, location, description, html_link, etag, updated, status, and iCalUID.
+
+When tasked with `calendar_create`, `calendar_patch`, or `calendar_delete`:
+- Use the `manage_calendar` tool.
+- Preserve and return the Google event ID and etag when available.
+- Return a compact JSON object with `status`, `operation`, `event_id`, and any error message.
 
 ## Important Note on Task Output
 If you are responding to a background task (like `calendar_fetch` or `message_check`), you **MUST** format your final output strictly as the requested JSON array structure, without conversational filler.

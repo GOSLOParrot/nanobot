@@ -36,6 +36,9 @@ _DEFAULT_STREAM = "parrot.nanobot.dispatch"
 _DEFAULT_RESULTS_CH = "parrot.nanobot.results"
 _DEFAULT_GROUP = "nanobot-workers"
 _DEFAULT_CONSUMER = "worker-0"
+_HEARTBEAT_KEY = "parrot:nanobot_heartbeat"
+_HEARTBEAT_FIELD = "main_worker"
+_HEARTBEAT_BUSY_FIELD = "main_worker_busy"
 
 
 class ParrotBusConfig(Base):
@@ -147,11 +150,16 @@ class ParrotBusChannel(BaseChannel):
             "task_id": task_id,
             "task_type": task_type,
             "msg_id": msg_id,
+            # ParrotCarriers Scheduler uses this to fan the result back to
+            # trigger-specific channels such as ``calendar_result``.
+            "result_channel": params.get("result_channel", ""),
+            "params": params,
         }
 
         content = self._build_prompt(task_type, params)
 
         logger.info("parrot_bus: ingesting task {} (type={})", task_id, task_type)
+        await self._write_heartbeat(busy=True)
         await self._handle_message(
             sender_id="brain-agent",
             chat_id=task_id,
@@ -168,6 +176,29 @@ class ParrotBusChannel(BaseChannel):
     @staticmethod
     def _build_prompt(task_type: str, params: dict) -> str:
         """Turn a structured task into a natural-language prompt for the agent."""
+        instructions = str(params.get("instructions", "") or "").strip()
+        if task_type == "calendar_fetch":
+            return (
+                "Task: calendar_fetch.\n"
+                "Use the google-workspace skill and the manage_calendar MCP tool. "
+                "Return only valid JSON, with no conversational filler.\n"
+                f"{instructions}\n"
+            )
+        if task_type in {"calendar_create", "calendar_patch", "calendar_delete"}:
+            return (
+                f"Task: {task_type}.\n"
+                "Use the google-workspace skill and the manage_calendar MCP tool. "
+                "Apply the requested calendar mutation, then return only valid JSON "
+                "describing the operation status and Google event id.\n"
+                f"Parameters: {json.dumps(params, ensure_ascii=False)}"
+            )
+        if task_type == "message_check":
+            return (
+                "Task: message_check.\n"
+                "Use the google-workspace skill and the manage_email MCP tool. "
+                "Return only valid JSON, with no conversational filler.\n"
+                f"{instructions}\n"
+            )
         if task_type == "research" and "query" in params:
             return f"Research the following topic and provide a concise answer: {params['query']}"
         if task_type == "summarize" and "text" in params:
@@ -191,8 +222,11 @@ class ParrotBusChannel(BaseChannel):
             "result": msg.content,
             "completed_at": time.time(),
         }
+        if meta.get("result_channel"):
+            result["result_channel"] = meta["result_channel"]
 
         await r.publish(self.config.results_channel, json.dumps(result))
+        await self._write_heartbeat(busy=False)
         logger.info("parrot_bus: result published for task {}", task_id)
 
         await self._archive_to_graphiti(msg.content, group_id="maid")
@@ -206,6 +240,22 @@ class ParrotBusChannel(BaseChannel):
             pass
         except Exception:
             logger.debug("parrot_bus: graphiti archive skipped (not critical)")
+
+    async def _write_heartbeat(self, *, busy: bool) -> None:
+        """Update ParrotCarriers' Nanobot activity marker.
+
+        IdleArchiveTrigger treats ``main_worker`` as the last activity time and
+        ``main_worker_busy`` as a guard against archiving while a task is still
+        in flight.
+        """
+        try:
+            r = await self._get_redis()
+            await r.hset(_HEARTBEAT_KEY, mapping={
+                _HEARTBEAT_FIELD: str(time.time()),
+                _HEARTBEAT_BUSY_FIELD: "1" if busy else "0",
+            })
+        except Exception:
+            logger.debug("parrot_bus: heartbeat write skipped")
 
     # ── Lifecycle ──────────────────────────────────────────────────────
 
