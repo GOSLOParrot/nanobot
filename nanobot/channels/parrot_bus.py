@@ -76,7 +76,7 @@ class ParrotBusChannel(BaseChannel):
             if aioredis is None:
                 raise RuntimeError(
                     "parrot_bus channel requires 'redis' package. "
-                    "Install with: pip install redis>=5.0"
+                    "Install with: pip install 'redis>=7.1,<9.0'"
                 )
             self._redis = aioredis.from_url(
                 self.config.redis_url, decode_responses=True

@@ -73,7 +73,7 @@ discord = [
     "discord.py>=2.5.2,<3.0.0",
 ]
 parrot = [
-    "redis>=5.0,<6.0",
+    "redis>=7.1,<9.0",
 ]
 langsmith = [
     "langsmith>=0.1.0",
